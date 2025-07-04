@@ -1,5 +1,5 @@
 import { Temporal } from "temporal-polyfill";
-import { dateDifference } from "$lib/utils";
+import { calcDoublingTime, calcVelocity } from "$lib/utils";
 
 type PsaData = { psa: number; date: string };
 type FullPsaData = PsaData & {
@@ -73,30 +73,5 @@ export const load = async () => {
 			const psavel = calcVelocity(prev.date, prev.psa, current.date, current.psa);
 			return { ...current, psadt, psavel };
 		});
-
-		function calcDoublingTime(
-			date1: string,
-			value1: number,
-			date2: string,
-			value2: number,
-			decimals = 1,
-		) {
-			const diffdate = dateDifference(date1, date2).years;
-			const psaRatio = value2 / value1;
-			const psadt = diffdate / Math.log(psaRatio);
-			return isFinite(psadt) ? parseFloat(psadt.toFixed(decimals)) : 0;
-		}
-		function calcVelocity(
-			time1: string,
-			value1: number,
-			time2: string,
-			value2: number,
-			decimals = 2,
-		) {
-			const diffdate = dateDifference(time1, time2).years;
-			const diffValues = value2 - value1;
-			const vel = diffValues / diffdate;
-			return isFinite(vel) ? parseFloat(vel.toFixed(decimals)) : 0;
-		}
 	}
 };

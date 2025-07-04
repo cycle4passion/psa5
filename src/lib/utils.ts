@@ -18,3 +18,29 @@ export function dateDifference(
 
 	return plainDate2.since(plainDate1, { largestUnit: unit });
 }
+
+export function calcDoublingTime(
+	date1: string,
+	value1: number,
+	date2: string,
+	value2: number,
+	decimals = 1,
+) {
+	const diffdate = dateDifference(date1, date2).years;
+	const psaRatio = value2 / value1;
+	const psadt = diffdate / Math.log(psaRatio);
+	return isFinite(psadt) ? parseFloat(psadt.toFixed(decimals)) : 0;
+}
+
+export function calcVelocity(
+	time1: string,
+	value1: number,
+	time2: string,
+	value2: number,
+	decimals = 2,
+) {
+	const diffdate = dateDifference(time1, time2).years;
+	const diffValues = value2 - value1;
+	const vel = diffValues / diffdate;
+	return isFinite(vel) ? parseFloat(vel.toFixed(decimals)) : 0;
+}
