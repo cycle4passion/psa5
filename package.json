@@ -16,12 +16,16 @@
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
+		"@skeletonlabs/skeleton": "^3.1.3",
+		"@skeletonlabs/skeleton-svelte": "^1.2.1",
 		"@sveltejs/adapter-auto": "^6.0.0",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/forms": "^0.5.9",
 		"@tailwindcss/typography": "^0.5.15",
-		"@tailwindcss/vite": "^4.0.0",
+		"@tailwindcss/vite": "^4.1.6",
+		"@types/d3-scale": "^4.0.9",
+		"@types/d3-shape": "^3.1.7",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^3.0.0",
@@ -31,7 +35,7 @@
 		"prettier-plugin-tailwindcss": "^0.6.11",
 		"svelte": "^5.0.0",
 		"svelte-check": "^4.0.0",
-		"tailwindcss": "^4.0.0",
+		"tailwindcss": "^4.1.6",
 		"typescript": "^5.0.0",
 		"typescript-eslint": "^8.20.0",
 		"vite": "^6.2.6"
@@ -40,5 +44,17 @@
 		"onlyBuiltDependencies": [
 			"esbuild"
 		]
+	},
+	"dependencies": {
+		"@layerstack/tailwind": "2.0.0-next.16",
+		"@layerstack/utils": "2.0.0-next.13",
+		"@lucide/svelte": "^0.509.0",
+		"d3-array": "^3.2.4",
+		"d3-random": "^3.0.1",
+		"d3-scale": "^4.0.2",
+		"d3-shape": "^3.2.0",
+		"dayjs": "^1.11.13",
+		"layerchart": "2.0.0-next.28",
+		"temporal-polyfill": "^0.3.0"
 	}
 }

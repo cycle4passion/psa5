@@ -1,3 +1,21 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+@source '../node_modules/layerchart/dist';
+@import "@skeletonlabs/skeleton";
+@import "@skeletonlabs/skeleton/optional/presets";
+@import "@skeletonlabs/skeleton/themes/wintry";
+
+@source '../node_modules/@skeletonlabs/skeleton-svelte/dist';
+@import "@skeletonlabs/skeleton/optional/presets";
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
+
+@import "@layerstack/tailwind/themes/skeleton.css";
+/* @theme {
+	--color-primary: hsl(257.4075 100% 50%);
+	--color-surface-100: hsl(180 100% 100%);
+	--color-surface-200: hsl(0 0% 94.902%);
+	--color-surface-300: hsl(180 1.9608% 90%);
+	--color-surface-content: hsl(215 27.907% 16.8627%);
+} */

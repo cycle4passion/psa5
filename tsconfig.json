@@ -3,6 +3,8 @@
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": true,
+		"target": "es2022", // Required for at()
+		"lib": ["es2022", "dom"],
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"resolveJsonModule": true,
