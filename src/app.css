@@ -11,11 +11,22 @@
 @import "@skeletonlabs/skeleton/optional/presets";
 @custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
 
-@import "@layerstack/tailwind/themes/skeleton.css";
-/* @theme {
-	--color-primary: hsl(257.4075 100% 50%);
-	--color-surface-100: hsl(180 100% 100%);
-	--color-surface-200: hsl(0 0% 94.902%);
-	--color-surface-300: hsl(180 1.9608% 90%);
-	--color-surface-content: hsl(215 27.907% 16.8627%);
-} */
+/* @import "@layerstack/tailwind/themes/skeleton.css"; */
+@theme {
+	/* Define additional color (Skeleton provides all the other `surface-*` colors (but they need remapped for charts */
+	--color-surface-content: var(--base-font-color);
+}
+
+.lc-root-container {
+	--color-surface-100: var(--color-surface-50);
+	--color-surface-200: var(--color-surface-100);
+	--color-surface-300: var(--color-surface-200);
+	--color-surface-content: var(--base-font-color);
+
+	html[data-mode="dark"] & {
+		--color-surface-100: var(--color-surface-700);
+		--color-surface-200: var(--color-surface-800);
+		--color-surface-300: var(--color-surface-900);
+		--color-surface-content: var(--base-font-color-dark);
+	}
+}
