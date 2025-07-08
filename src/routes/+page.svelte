@@ -135,9 +135,28 @@
 			{/if}
 		{/snippet}
 
-		{#snippet aboveMarks({ visibleSeries, series })}
+		{#snippet aboveMarks({
+			visibleSeries,
+			series,
+			context,
+		}: {
+			visibleSeries: any;
+			series: any;
+			context: any;
+		})}
+			{@const sref = series.find((s: any) => s.key === "psa")}
 			{#each visibleSeries as s (s.key)}
-				{@const seriesref = series.find((ser) => s.key === ser.key)}
+				{@const seriesref = series.find((ser: any) => s.key === ser.key)}
+				<Text
+					x={context.xScale(context.x(s))}
+					y={context.yScale(sref?.props.threshold ?? 0) - 10}
+					class={`text-[10px] fill-${seriesref?.props.pcolor} font-semibold`}
+					textAnchor="middle">
+					{trim0decimals(sref?.props.threshold)}
+				</Text>
+			{/each}
+			{#each visibleSeries as s (s.key)}
+				{@const seriesref = series.find((ser: any) => s.key === ser.key)}
 				<AnnotationLine
 					y={seriesref?.props?.threshold}
 					label={s.key.toUpperCase()}
@@ -161,66 +180,18 @@
 			{/if}
 		{/snippet}
 
-		{#snippet axis({ context, visibleSeries, series })}
-			<Axis
-				placement="bottom"
-				scale={context.xScale}
-				rule={false}
-				tickLabelProps={{ class: `stroke-transparent fill-primary-500` }} />
-			<Axis
-				label="PSA"
-				placement="left"
-				scale={context.yScale}
-				rule={{ class: `fill-primary-500}` }}
-				ticks={(scale) => [4, ...(scale.ticks?.() ?? [])]}
-				tickLabelProps={{
-					dx: -18,
-					textAnchor: "start",
-					class: `stroke-transparent fill-primary-500`,
-				}}
-				classes={{ tick: `stroke-primary-500` }} />
-			<!-- Uncommenting below crashes -->
-			<!-- {#if visibleSeries.some((s) => s.key === "psadt")}
-				{@const ymax = Math.ceil(Math.max(...context.data.map((s: any) => s.psadt ?? 0)))}
-				{@debug ymax}
-				<Axis
-					label="PSADT"
-					placement="right"
-					scale={scaleSqrt([0, ymax], [context.height, 0])}
-					rule={{ class: `fill-secondary-500}` }}
-					ticks={(scale) => [2, ...(scale.ticks?.() ?? [])]}
-					tickLabelProps={{
-						dx: 8,
-						textAnchor: "start",
-						class: `stroke-transparent fill-secondary-500`,
-					}}
-					labelProps={{ dx: -50, class: `fill-secondary-500` }}
-					class={`transition-all ${visibleSeries.some((s) => s.key === "psavel") ? "translate-x-[50px]" : ""}`}
-					classes={{ tick: `stroke-secondary-500` }} />
-			{/if} -->
-
-			{#if visibleSeries.some((s) => s.key === "psavel")}
-				{@const ymax = Math.ceil(Math.max(...context.data.map((s: any) => s.psavel ?? 0)))}
-				{@debug ymax}
-				{@debug context}
-				<Axis
-					label="PSAVel"
-					placement="right"
-					scale={scaleSqrt([0, ymax], [context.height, 0])}
-					rule={{ class: `fill-tertiary-500` }}
-					ticks={(scale) => [0.75, ...(scale.ticks?.() ?? [])]}
-					tickLabelProps={{
-						dx: 8,
-						textAnchor: "start",
-						class: `stroke-transparent fill-tertiary-500`,
-					}}
-					labelProps={{ dx: -50, class: `fill-tertiary-500` }}
-					classes={{ tick: `stroke-tertiary-500` }} />
-			{/if}
-			<!-- Below is erroring, so split it up above, unfortunately same eachkey duplicate error  -->
-			<!-- {#each visibleSeries as s (s.key)}
-				{@const sref = series.find((ser) => s.key === ser.key)}
-				{@const ymax = Math.ceil(Math.max(...context.data.map((ser) => ser[s.key] ?? 0)))}
+		{#snippet axis({
+			context,
+			visibleSeries,
+			series,
+		}: {
+			visibleSeries: any;
+			series: any;
+			context: any;
+		})}
+			{#each visibleSeries as s (s.key)}
+				{@const sref = series.find((s: any) => s.key === s.key)}
+				{@const ymax = Math.ceil(Math.max(...context.data.map((s: any) => s[s.key] ?? 0)))}
 
 				<Axis
 					label={s.key.toUpperCase()}
@@ -232,10 +203,7 @@
 						dx: s.key === "psa" ? 0 : -50,
 						class: `fill-${sref?.props.pcolor} stroke-transparent`,
 					}}
-					ticks={(scale) => [sref?.props.threshold, ...(scale.ticks?.() ?? [])]}
-					tickMarks={{
-						class: `color-primary-500 [stroke-dasharray:2,2]`,
-					}}
+					ticks={(scale) => [...new Set([sref?.props.threshold, ...(scale.ticks?.() ?? [])])]}
 					tickLabelProps={{
 						dx: s.key === "psa" ? -20 : 8,
 						textAnchor: "start",
@@ -244,8 +212,9 @@
 					classes={{ tick: `stroke-${sref?.props.pcolor}` }}
 					class={`transition-all ${sref.key === "psadt" && visibleSeries.some((s) => s.key === "psavel") ? "translate-x-[50px]" : ""}`}
 					tickLength={6} />
-			{/each}  -->
+			{/each}
 		{/snippet}
+
 		<!-- {#snippet tooltip({ context, series })}
 			{@const activeSeriesColor = series.find((s) => s.key === context.tooltip.data?.test)?.color}
 			<Tooltip.Root>
