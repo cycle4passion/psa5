@@ -16,8 +16,11 @@
 		Points,
 		Tooltip as ChartTooltip,
 	} from "layerchart";
-	import { scaleTime, scaleSqrt } from "d3-scale";
+	import { SeriesState } from "/Users/sjr/Documents/Shared/Coding/Svelte/psa5/node_modules/layerchart/dist/components/charts/utils.svelte.js";
+	import { scaleTime, scaleSqrt, scaleLinear } from "d3-scale";
 	import { curveCatmullRom } from "d3-shape";
+	import { onMount } from "svelte";
+	import Dice_4 from "@lucide/svelte/icons/dice-4";
 	// import { date, format, PeriodType, sortFunc, styles } from "@layerstack/utils";
 	// import { trim0decimals, unique } from "$lib/utils";
 	// import { Slider } from "@skeletonlabs/skeleton-svelte";
@@ -25,38 +28,57 @@
 	let showannots = $state(true);
 	let { data } = $props();
 	let { psas, annots } = data;
-	const errorRed = "rgb(255, 0, 0)";
-	const series = [
+
+	interface SeriesItem {
+		key: "psa" | "psadt" | "psavel";
+		color: string;
+		props: {
+			pcolor: string;
+			threshold: number;
+			lowcolor: string;
+			highcolor: string;
+			dashed: number;
+		};
+	}
+
+	interface PsaData {
+		date: Date;
+		psa: number;
+		psadt?: number;
+		psavel?: number;
+	}
+
+	const series: SeriesItem[] = [
 		{
 			key: "psa",
 			color: "var(--color-primary-500)",
-			threshold: 4,
 			props: {
+				pcolor: "primary-500",
 				threshold: 4,
-				lowcolor: "var(--color-success-500)",
-				highcolor: errorRed,
+				lowcolor: "var(--color-primary-500)",
+				highcolor: "var(--color-error-500)",
 				dashed: 0,
 			},
 		},
 		{
 			key: "psadt",
 			color: "var(--color-secondary-500)",
-			threshold: 2,
 			props: {
+				pcolor: "secondary-500",
 				threshold: 2,
-				lowcolor: errorRed,
-				highcolor: "var(--color-secondary-500)",
+				lowcolor: "var(--color-secondary-500)",
+				highcolor: "var(--color-error-500)",
 				dashed: 4,
 			},
 		},
 		{
 			key: "psavel",
 			color: "var(--color-tertiary-500)",
-
 			props: {
+				pcolor: "tertiary-500",
 				threshold: 0.75,
 				lowcolor: "var(--color-tertiary-500)",
-				highcolor: errorRed,
+				highcolor: "var(--color-error-500)",
 				dashed: 6,
 			},
 		},
@@ -69,65 +91,35 @@
 </label>
 <div class="border-primary-500/20 hover:border-primary-500/50 my-4 h-[500px] rounded-md border p-2">
 	<LineChart
-		padding={{ top: 20, bottom: 60, left: 20, right: 90 }}
+		padding={{ top: 20, bottom: 60, left: 40, right: 90 }}
 		data={psas}
 		x="date"
 		xScale={scaleTime()}
 		yScale={scaleSqrt()}
-		legend
 		brush
-		props={{ tooltip: { context: { mode: "quadtree" } } }}
+		legend
+		grid={false}
 		{series}>
 		{#snippet marks({ context, visibleSeries, getSplineProps, getPointsProps })}
 			{#each visibleSeries as s, i (s.key)}
-				{@const thresholdOffset = context.yScale(4)}
+				{@const sref = series.find((ser) => s.key === ser.key)}
+				{@const thresholdOffset = context.yScale(sref?.props.threshold ?? 0)}
 				<LinearGradient
 					stops={[
 						[thresholdOffset, "var(--color-primary-500)"],
-						[thresholdOffset, "var(--color-secondary-500)"],
-					]}
-					vertical>
-					{#snippet children({ gradient })}
-						<Spline stroke={gradient} curve={curveCatmullRom} y={s.key} {...getSplineProps(s, i)} />
-						<Points
-							r={6}
-							{...getPointsProps(s, i)}
-							fill={s.key === "psa" ? gradient : "transparent"} />
-					{/snippet}
-				</LinearGradient>
-			{/each}
-
-			<!-- {#each visibleSeries as s, i (s.key)}
-				{@const seriesref = series.find((ser) => s.key === ser.key)}
-				{@const highlightSeriesKey = s.key === "psa" ? "psadt" : "psa"}
-
-				<LinearGradient
-					stops={[
-						[seriesref?.props.threshold, seriesref?.props.highcolor],
-						[seriesref?.props.threshold, seriesref?.props.lowcolor],
+						[thresholdOffset, "var(--color-error-500)"],
 					]}
 					units="userSpaceOnUse"
 					vertical>
 					{#snippet children({ gradient })}
-						<Spline
-							data={psas}
-							y={s.key}
-							{...getSplineProps(s, i)}
-							class={`stroke-2 ${series.props.dashed ? `[stroke-dasharray:${seriesref?.props.dashed}] opacity-50` : ""}`}
-							stroke={gradient}
-							curve={curveCatmullRom} />
+						<Spline stroke={gradient} curve={curveCatmullRom} {...getSplineProps(s, i)} />
+						<Points
+							r={5}
+							opacity={s.key === "psa" ? 100 : 0}
+							stroke={s.key === "psa" ? gradient : "transparent"} />
 					{/snippet}
-					<Points r={6} {...getPointsProps(s, i)} fill={gradient} />
-					<Labels
-						offset={12}
-						format={(value) =>
-							s.key === "psa" || s.key === highlightSeriesKey || visibleSeries.length === 1
-								? value
-								: ""}
-						class={`stroke-1 text-xs`}
-						{...getLabelsProps(s, i)} />
 				</LinearGradient>
-			{/each} -->
+			{/each}
 		{/snippet}
 
 		{#snippet highlight({ context })}
@@ -143,28 +135,18 @@
 			{/if}
 		{/snippet}
 
-		{#snippet aboveMarks({ context })}
-			<AnnotationLine
-				y={4}
-				label="PSA (4.0)"
-				props={{
-					line: { class: "stroke-red-500 [stroke-dasharray:2,2]" },
-					label: { class: "stroke-red-500 opacity-20" },
-				}} />
-			<AnnotationLine
-				x={0.75}
-				label="PSAV (0.75 ng/ml/year)"
-				props={{
-					line: { class: "stroke-red-500 [stroke-dasharray:2,2]" },
-					label: { class: "stroke-red-500 opacity-20" },
-				}} />
-			<AnnotationLine
-				x={2}
-				label="PSADT (2 year)"
-				props={{
-					line: { class: "stroke-red-500 [stroke-dasharray:2,2]" },
-					label: { class: "stroke-red-500 opacity-20" },
-				}} />
+		{#snippet aboveMarks({ visibleSeries, series })}
+			{#each visibleSeries as s (s.key)}
+				{@const seriesref = series.find((ser) => s.key === ser.key)}
+				<AnnotationLine
+					y={seriesref?.props?.threshold}
+					label={s.key.toUpperCase()}
+					labelXOffset={10}
+					props={{
+						line: { class: `stroke-${seriesref?.props.pcolor}/40 [stroke-dasharray:2,2]` },
+						label: { class: `fill-${seriesref?.props.pcolor} opacity-40 text-[8px]` },
+					}} />
+			{/each}
 			{#if showannots}
 				{#each annots as anot}
 					<AnnotationLine
@@ -172,59 +154,97 @@
 						label={anot.test}
 						labelXOffset={4}
 						props={{
-							line: { class: "stroke-red-500 [stroke-dasharray:2,2]" },
-							label: { class: "fill-red-500" },
+							line: { class: "stroke-success-500/40 [stroke-dasharray:2,2]" },
+							label: { class: "fill-success-500 opacity-40 text-[8px]" },
 						}} />
 				{/each}
 			{/if}
 		{/snippet}
-		{#snippet axis({ context, visibleSeries })}
+
+		{#snippet axis({ context, visibleSeries, series })}
+			<Axis
+				placement="bottom"
+				scale={context.xScale}
+				rule={false}
+				tickLabelProps={{ class: `stroke-transparent fill-primary-500` }} />
 			<Axis
 				label="PSA"
 				placement="left"
 				scale={context.yScale}
-				rule
-				ticks={(scale) => [4, ...(scale.ticks?.() ?? [])]} />
-			<Axis
-				label="Date"
-				placement="bottom"
-				rule
-				scale={context.xScale}
-				class="text-xs text-gray-500" />
-			{#if visibleSeries.some((s: any) => s.key === "psadt")}
+				rule={{ class: `fill-primary-500}` }}
+				ticks={(scale) => [4, ...(scale.ticks?.() ?? [])]}
+				tickLabelProps={{
+					dx: -18,
+					textAnchor: "start",
+					class: `stroke-transparent fill-primary-500`,
+				}}
+				classes={{ tick: `stroke-primary-500` }} />
+			<!-- Uncommenting below crashes -->
+			<!-- {#if visibleSeries.some((s) => s.key === "psadt")}
+				{@const ymax = Math.ceil(Math.max(...context.data.map((s: any) => s.psadt ?? 0)))}
+				{@debug ymax}
 				<Axis
 					label="PSADT"
 					placement="right"
-					rule={{ class: "stroke-secondary-500" }}
-					scale={context.yScale}
-					labelProps={{
-						dx: -50,
-						class: "text-[14px] fill-secondary-500 stroke-transparent",
-					}}
-					format={(v) => (v.toFixed() === v ? v.toFixed() : v)}
-					ticks={(scale) => [0.75, ...(scale.ticks?.() ?? [])]}
-					tickLabelProps={{
-						dx: 8,
-						textAnchor: "start",
-						class: `stroke-transparent font-semibold fill-secondary-500`,
-					}}
-					tickLength={6} />
-			{/if}
-			{#if visibleSeries.some((s: any) => s.key === "psavel")}
-				<Axis
-					label="PSAVelocity"
-					placement="right"
-					rule={{ class: "stroke-tertiary-500" }}
-					scale={context.yScale}
-					labelProps={{ dx: -50, class: "text-[14px] fill-tertiary-500 stroke-transparent" }}
+					scale={scaleSqrt([0, ymax], [context.height, 0])}
+					rule={{ class: `fill-secondary-500}` }}
 					ticks={(scale) => [2, ...(scale.ticks?.() ?? [])]}
 					tickLabelProps={{
 						dx: 8,
 						textAnchor: "start",
-						class: `stroke-transparent font-semibold fill-tertiary-500`,
+						class: `stroke-transparent fill-secondary-500`,
 					}}
-					class={`stroke-tertiary-500 ${visibleSeries.some((s: any) => s.key === "psadt") ? "translate-x-[50px]" : ""}`} />
+					labelProps={{ dx: -50, class: `fill-secondary-500` }}
+					class={`transition-all ${visibleSeries.some((s) => s.key === "psavel") ? "translate-x-[50px]" : ""}`}
+					classes={{ tick: `stroke-secondary-500` }} />
+			{/if} -->
+
+			{#if visibleSeries.some((s) => s.key === "psavel")}
+				{@const ymax = Math.ceil(Math.max(...context.data.map((s: any) => s.psavel ?? 0)))}
+				{@debug ymax}
+				{@debug context}
+				<Axis
+					label="PSAVel"
+					placement="right"
+					scale={scaleSqrt([0, ymax], [context.height, 0])}
+					rule={{ class: `fill-tertiary-500` }}
+					ticks={(scale) => [0.75, ...(scale.ticks?.() ?? [])]}
+					tickLabelProps={{
+						dx: 8,
+						textAnchor: "start",
+						class: `stroke-transparent fill-tertiary-500`,
+					}}
+					labelProps={{ dx: -50, class: `fill-tertiary-500` }}
+					classes={{ tick: `stroke-tertiary-500` }} />
 			{/if}
+			<!-- Below is erroring, so split it up above, unfortunately same eachkey duplicate error  -->
+			<!-- {#each visibleSeries as s (s.key)}
+				{@const sref = series.find((ser) => s.key === ser.key)}
+				{@const ymax = Math.ceil(Math.max(...context.data.map((ser) => ser[s.key] ?? 0)))}
+
+				<Axis
+					label={s.key.toUpperCase()}
+					placement={s.key === "psa" ? "left" : "right"}
+					format={(v) => v || ""}
+					rule={{ class: `stroke-${sref?.props?.pcolor}` }}
+					scale={scaleSqrt([0, ymax], [context.height, 0])}
+					labelProps={{
+						dx: s.key === "psa" ? 0 : -50,
+						class: `fill-${sref?.props.pcolor} stroke-transparent`,
+					}}
+					ticks={(scale) => [sref?.props.threshold, ...(scale.ticks?.() ?? [])]}
+					tickMarks={{
+						class: `color-primary-500 [stroke-dasharray:2,2]`,
+					}}
+					tickLabelProps={{
+						dx: s.key === "psa" ? -20 : 8,
+						textAnchor: "start",
+						class: `stroke-transparent fill-${sref?.props.pcolor}`,
+					}}
+					classes={{ tick: `stroke-${sref?.props.pcolor}` }}
+					class={`transition-all ${sref.key === "psadt" && visibleSeries.some((s) => s.key === "psavel") ? "translate-x-[50px]" : ""}`}
+					tickLength={6} />
+			{/each}  -->
 		{/snippet}
 		<!-- {#snippet tooltip({ context, series })}
 			{@const activeSeriesColor = series.find((s) => s.key === context.tooltip.data?.test)?.color}

@@ -30,8 +30,8 @@ importers:
         specifier: ^3.2.0
         version: 3.2.0
       layerchart:
-        specifier: 2.0.0-next.28
-        version: 2.0.0-next.28(svelte@5.35.2)
+        specifier: 2.0.0-next.29
+        version: 2.0.0-next.29(svelte@5.35.2)
       temporal-polyfill:
         specifier: ^0.3.0
         version: 0.3.0
@@ -1420,8 +1420,8 @@ packages:
   known-css-properties@0.35.0:
     resolution: {integrity: sha512-a/RAk2BfKk+WFGhhOCAYqSiFLc34k8Mt/6NWRI4joER0EYUzXIcFivjjnoD3+XU1DggLn/tZc3DOAgke7l8a4A==}
 
-  layerchart@2.0.0-next.28:
-    resolution: {integrity: sha512-83aLvCfvP838ZX6f4BvwbbTlVJkpvC3nEQ1GFcY95fO2XKwHKcxEMzzIsmJXp6K6VqiHB2XnJAo26XiHxeKKxQ==}
+  layerchart@2.0.0-next.29:
+    resolution: {integrity: sha512-zubub4nkInMW9epKi92vlZ6RrXf0TwL78Ak7unFR38Aukv9BkKfJnC5Ngww35sKRJS4G3HrzKE1/HUpvuDv92g==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -3498,7 +3498,7 @@ snapshots:
 
   known-css-properties@0.35.0: {}
 
-  layerchart@2.0.0-next.28(svelte@5.35.2):
+  layerchart@2.0.0-next.29(svelte@5.35.2):
     dependencies:
       '@dagrejs/dagre': 1.1.4
       '@layerstack/svelte-actions': 1.0.1-next.12
