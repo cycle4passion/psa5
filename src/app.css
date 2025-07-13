@@ -30,3 +30,5 @@
 		--color-surface-content: var(--base-font-color-dark);
 	}
 }
+
+/* @import "@layerstack/tailwind/themes/skeleton.css"; */
