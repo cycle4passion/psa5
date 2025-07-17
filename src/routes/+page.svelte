@@ -115,7 +115,9 @@
 			pcolor: "primary-500",
 			color: "var(--color-primary-500)",
 			stroke: "var(--stroke-primary-500)",
+			stroke2: "stroke-primary-500",
 			fill: "var(--fill-primary-500)",
+			fill2: "fill-primary-500",
 			threshold: 4,
 			lowcolor: "var(--color-primary-500)",
 			highcolor: "var(--color-error-500)",
@@ -133,7 +135,9 @@
 			pcolor: "secondary-500",
 			color: "var(--color-secondary-500)",
 			stroke: "var(--stroke-secondary-500)",
+			stroke2: "stroke-secondary-500",
 			fill: "var(--fill-secondary-500)",
+			fill2: "fill-secondary-500",
 			threshold: 2,
 			lowcolor: "var(--color-secondary-500)",
 			highcolor: "var(--color-error-500)",
@@ -151,7 +155,9 @@
 			pcolor: "tertiary-500",
 			color: "var(--color-tertiary-500)",
 			stroke: "var(--stroke-tertiary-500)",
+			stroke2: "stroke-tertiary-500",
 			fill: "var(--fill-tertiary-500)",
+			fill2: "fill-tertiary-500",
 			threshold: 0.75,
 			lowcolor: "var(--color-tertiary-500)",
 			highcolor: "var(--color-error-500)",
@@ -177,6 +183,7 @@
 	class="border-primary-500/20 hover:border-primary-500/50 bg-surface-900 my-4 h-[500px] rounded-md border p-2">
 	<LineChart
 		grid={false}
+		rule={false}
 		padding={{ top: 10, bottom: 60, left: 40, right: 70 }}
 		xPadding={[5, 10]}
 		data={psas}
@@ -186,27 +193,34 @@
 		yScale={scaleSqrt()}
 		brush
 		{series}>
-		<!--{#snippet marks({ context, visibleSeries, highlightKey, getSplineProps, getPointsProps })}
+		{#snippet marks({
+			context,
+			visibleSeries,
+			highlightKey,
+			getSplineProps,
+			getLabelsProps,
+			getPointsProps,
+		})}
 			{#each visibleSeries as s, i (s.key)}
-				<!~~ {@const sref = series.find((ser) => s.key === ser.key)} ~~>
-				{@const sref = series2.get(s.key)}
+				{@const sref = series.find((ser) => s.key === ser.key)}
+				<!-- {@const sref = series2.get(s.key)} -->
 				{@const thresholdOffset = sref?.threshold ?? 0}
-				{@const lastDataPoint = context.data?.[context.data.length - 1]}
 				<LinearGradient
 					stops={[
-						[thresholdOffset, `var(--${sref?.color}`],
 						[thresholdOffset, "var(--color-red-500)"],
+						[thresholdOffset, `var(--${sref?.color}`],
 					]}
 					units="userSpaceOnUse"
 					vertical>
 					{#snippet children({ gradient })}
-						<Spline stroke={gradient} curve={curveCatmullRom} {...getSplineProps(s, i)} />
+						<Spline {...getSplineProps(s, i)} stroke={gradient} curve={curveCatmullRom} />
 						{#if s.key === "psa" || highlightKey === s.key}
-							<Points r={3} {...getPointsProps(s, i)} />
+							<Points {...getPointsProps(s, i)} r={2} />
 						{/if}
-						{#if highlightKey === s.key}
-							<Labels />
-						{/if}
+						<Labels
+							{...getLabelsProps(s, i)}
+							dy={-3}
+							class={`${sref?.fill2} ${s.key === highlightKey ? "opacity-100" : "opacity-0"}`} />
 					{/snippet}
 				</LinearGradient>
 			{/each}
@@ -220,23 +234,33 @@
 			series: any;
 			context: any;
 		})}
-			{#each visibleSeries as s (s.key)}
+			<AnnotationLine
+				y={15.0}
+				label="PSA"
+				props={{
+					line: {
+						class: `stroke-primary-500 opacity-40 [stroke-dasharray:2,2] [stroke-linecap:round]`,
+					},
+					label: {
+						class: `stroke-primary-500 opacity-40 text-[8px] [stroke-linecap:round]`,
+					},
+				}} />
+
+			<!-- {#each visibleSeries as s (s.key)}
 				{@const sref = series.find((ser: any) => s.key === ser.key)}
 				<AnnotationLine
-					y={context.yScale(sref?.threshold)}
+					y={sref?.threshold}
 					label={s.key.toUpperCase()}
-					labelXOffset={10}
-					labelPlacement="top-left"
 					props={{
 						line: {
-							class: `${sref?.color}/40 [stroke-dasharray:2,2] [stroke-linecap:round]`,
+							class: `${sref?.stroke2} opacity-40 [stroke-dasharray:2,2] [stroke-linecap:round]`,
 						},
 						label: {
-							class: `${sref?.fill} opacity-40 text-[8px] [stroke-linecap:round]`,
+							class: `${sref?.fill2} opacity-40 text-[8px] [stroke-linecap:round]`,
 						},
 					}} />
-			{/each}
-			{#if showannots}
+			{/each} -->
+			<!-- {#if showannots}
 				{#each annots as anot}
 					<AnnotationLine
 						x={anot.date}
@@ -254,9 +278,9 @@
 							},
 						}} />
 				{/each}
-			{/if}
+			{/if} -->
 		{/snippet}
--->
+
 		{#snippet axis({
 			context,
 			visibleSeries,
@@ -266,8 +290,9 @@
 			visibleSeries: any;
 			series: any;
 		})}
-			<!-- note comment below needed to force TW to compile for combine template strings below o/w unrecognized -->
-			<!-- fill-primary-500 fill-secondary-500 fill-tertiary-500 stroke-primary-500 stroke-secondary-500 stroke-tertiary-500 -->
+			<!-- note comment below needed to force TW to compile for combine template strings below o/w
+			unrecognized fill-primary-500 fill-secondary-500 fill-tertiary-500 stroke-primary-500
+			stroke-secondary-500 stroke-tertiary-500 -->
 			<Axis
 				placement="bottom"
 				rule={{ class: "stroke-primary-500" }}
@@ -281,13 +306,12 @@
 				<Axis
 					label={s.key.toUpperCase()}
 					placement={s.key === "psa" ? "left" : "right"}
-					format={(v) => v || ""}
 					scale={scaleSqrt([0, ymax], [context.height, 0])}
 					ticks={(scale) => [...new Set([sref?.props.threshold, ...(scale.ticks?.() ?? [])])]}
 					rule={{ class: `stroke-${sref?.props?.pcolor}` }}
 					labelProps={{
 						dx: s.key === "psa" ? 5 : -40,
-						class: `fill-${sref?.props.pcolor} stroke-transparent`,
+						class: `fill-${sref?.pcolor} stroke-transparent`,
 					}}
 					tickLabelProps={{
 						dx: s.key === "psa" ? -20 : 8,
@@ -299,14 +323,14 @@
 			{/each}
 		{/snippet}
 
-		<!--	{#snippet tooltip({ context, visibleSeries, series })}
+		{#snippet tooltip({ context, visibleSeries, series })}
 			<Tooltip.Root class="rounded-xl p-4 shadow-xl" role="tooltip" aria-live="polite">
 				{#snippet children({ data })}
-					<!~~ {@debug data} ~~>
+					<!-- {@debug data} -->
 					{#if data.annotation}
-						<!~~ <div class="whitespace-nowrap">
+						<!-- <div class="whitespace-nowrap">
 							aaaa{data.annotation.details}
-						</div> ~~>
+						</div> -->
 						<Tooltip.Header>
 							{context.data.annotation.test} on {format(context.data.annotation.date, "day")}
 						</Tooltip.Header>
@@ -333,7 +357,7 @@
 
 		{#snippet legend({ getLegendProps })}
 			<Legend {...getLegendProps()} tickFormat={(s) => s.toUpperCase()} />
-		{/snippet}-->
+		{/snippet}
 	</LineChart>
 </div>
 
