@@ -187,7 +187,6 @@
 		padding={{ top: 10, bottom: 60, left: 40, right: 70 }}
 		xPadding={[5, 10]}
 		data={psas}
-		yDomain={[0, Math.ceil(Math.max(...psas.map((p) => p.psa))) + 1]}
 		x="date"
 		xScale={scaleTime()}
 		yScale={scaleSqrt()}
@@ -205,17 +204,18 @@
 				{@const sref = series.find((ser) => s.key === ser.key)}
 				<!-- {@const sref = series2.get(s.key)} -->
 				{@const thresholdOffset = sref?.threshold ?? 0}
+				<!-- {@debug thresholdOffset} -->
 				<LinearGradient
 					stops={[
 						[thresholdOffset, "var(--color-red-500)"],
-						[thresholdOffset, `var(--${sref?.color}`],
+						[thresholdOffset, `${sref?.color}`],
 					]}
 					units="userSpaceOnUse"
 					vertical>
 					{#snippet children({ gradient })}
 						<Spline {...getSplineProps(s, i)} stroke={gradient} curve={curveCatmullRom} />
 						{#if s.key === "psa" || highlightKey === s.key}
-							<Points {...getPointsProps(s, i)} r={2} />
+							<Points {...getPointsProps(s, i)} r={3} />
 						{/if}
 						<Labels
 							{...getLabelsProps(s, i)}
@@ -234,19 +234,7 @@
 			series: any;
 			context: any;
 		})}
-			<AnnotationLine
-				y={15.0}
-				label="PSA"
-				props={{
-					line: {
-						class: `stroke-primary-500 opacity-40 [stroke-dasharray:2,2] [stroke-linecap:round]`,
-					},
-					label: {
-						class: `stroke-primary-500 opacity-40 text-[8px] [stroke-linecap:round]`,
-					},
-				}} />
-
-			<!-- {#each visibleSeries as s (s.key)}
+			{#each visibleSeries as s (s.key)}
 				{@const sref = series.find((ser: any) => s.key === ser.key)}
 				<AnnotationLine
 					y={sref?.threshold}
@@ -259,8 +247,8 @@
 							class: `${sref?.fill2} opacity-40 text-[8px] [stroke-linecap:round]`,
 						},
 					}} />
-			{/each} -->
-			<!-- {#if showannots}
+			{/each}
+			{#if showannots}
 				{#each annots as anot}
 					<AnnotationLine
 						x={anot.date}
@@ -278,7 +266,7 @@
 							},
 						}} />
 				{/each}
-			{/if} -->
+			{/if}
 		{/snippet}
 
 		{#snippet axis({
